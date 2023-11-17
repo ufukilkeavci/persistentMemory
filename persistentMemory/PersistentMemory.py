@@ -5,19 +5,20 @@ import portalocker
 import platform
 
 class PersistentMemory:
-    appFolder = None
-    encryptionKey = None
-    cache = {}
+    __appFolder = None
+    __encryptionKey = None
+    __cache = {}
 
-    def __init__(self, appName, encryptionKey) -> None:
-        self.appFolder = self.getAppFolder(appName)
-        self.encryptionKey = encryptionKey
+    def __init__(self, appName, encryptionKey=None):
+        appFolder = self.__getAppFolder(appName)
+        self.__appFolder = appFolder
+        self.__encryptionKey = encryptionKey
         # Additional initialization code (e.g., folder creation, key validation) goes here
-        self.cache = {}  # Initialize an empty cache
+        self.__cache = {}  # Initialize an empty cache
 
         # check if the folder exists and create it if it doesn't
-        if not os.path.exists(self.appFolder):
-            os.makedirs(self.appFolder)
+        if not os.path.exists(self.__appFolder):
+            os.makedirs(self.__appFolder)
         
 
 
@@ -25,50 +26,52 @@ class PersistentMemory:
         keys = []
         try:
             # List all files in the appFolder
-            if self.appFolder and os.path.exists(self.appFolder):
-                keys = [f for f in os.listdir(self.appFolder) if os.path.isfile(os.path.join(self.appFolder, f))]
+            if self.__appFolder and os.path.exists(self.__appFolder):
+                keys = [f for f in os.listdir(self.__appFolder) if os.path.isfile(os.path.join(self.__appFolder, f))]
         except Exception as e:
             print(f"Error listing keys: {e}")
         
         return keys
 
     def push(self, key, data):
+        
+        # Diagnostic print for encryptionKey
         # Serialize data
         serializedData = pickle.dumps(data)
 
-        self.cache[key] = data
+        self.__cache[key] = data
         # check if data is None
         if serializedData is None:
             # if exists, delete the file
-            filePath = os.path.join(self.appFolder, key)
+            filePath = os.path.join(self.__appFolder, key)
             if os.path.exists(filePath):
                 os.remove(filePath)
             return
         
+        # Handle optional encryption
+        if self.__encryptionKey:
+            # Code to store value with encryption
+            fernet = Fernet(self.__encryptionKey)
+            dataToStore = fernet.encrypt(serializedData)
+        else:
+            # Code to store value without encryption
+            dataToStore = serializedData
         
 
-        # Encrypt data
-        if isinstance(self.encryptionKey, str):
-            encryptionKeyBytes = self.encryptionKey.encode()
-        else:
-            encryptionKeyBytes = self.encryptionKey
-
-        fernet = Fernet(encryptionKeyBytes)
-        encryptedData = fernet.encrypt(serializedData)
-
         # Write to file with locking
-        filePath = os.path.join(self.appFolder, key)
+        filePath = os.path.join(self.__appFolder, key)
         with open(filePath, 'wb') as file:
             # Lock the file before writing
             portalocker.lock(file, portalocker.LOCK_EX)
-            file.write(encryptedData)
+            file.write(dataToStore)
             # The lock is automatically released when the file is closed
 
     def get(self, key):
-        if key in self.cache:
-            return self.cache[key]
+        
+        if key in self.__cache:
+            return self.__cache[key]
 
-        filePath = os.path.join(self.appFolder, key)
+        filePath = os.path.join(self.__appFolder, key)
 
         # Check if the file exists
         if not os.path.exists(filePath):
@@ -78,14 +81,17 @@ class PersistentMemory:
         with open(filePath, 'rb') as file:
             encryptedData = file.read()
 
-        fernet = Fernet(self.encryptionKey)
-        try:
-            decryptedData = fernet.decrypt(encryptedData)
-        except Exception as e:
-            # Handle decryption error
-            print(f"Error during decryption: {e}")
-            return None
-
+        if self.__encryptionKey:
+            fernet = Fernet(self.__encryptionKey)
+            try:
+                decryptedData = fernet.decrypt(encryptedData)
+            except Exception as e:
+                # Handle decryption error
+                print(f"Error during decryption: {e}")
+                return None
+            dataFromFile = decryptedData
+        else:
+            dataFromFile = encryptedData
         # Deserialize the data
         try:
             return pickle.loads(decryptedData)
@@ -95,24 +101,35 @@ class PersistentMemory:
             return None
         
     def __getattr__(self, name):
-        # Check if getting a predefined attribute
-        if name in ["appFolder", "encryptionKey", "initialize", "push", "get", "__getattr__", "__setattr__", "cache"]:
-            # Handle as normal attribute
-            return self.__dict__[name]
+        if self.is_method(name):
+            return self.get_method(name)
+        elif self.is_class_attribute(name):
+            return self.get_class_attribute(name)
         else:
-            # Handle as a data key
             return self.get(name)
     
     def __setattr__(self, name, value):
         # Check if setting a predefined attribute
-        if name in ["appFolder", "encryptionKey", "initialize", "push", "get", "__getattr__", "__setattr__", "cache"]:
+        if self.is_class_attribute(name):
             # Handle as normal attribute
             self.__dict__[name] = value
         else:
             # Handle as a data key
             self.push(name, value)
 
-    def getAppFolder(self, appName):
+    def is_method(self, name):
+        return callable(getattr(self.__class__, name, None))
+
+    def is_class_attribute(self, name):
+        return name in self.__class__.__dict__
+
+    def get_method(self, name):
+        return getattr(self, name)
+
+    def get_class_attribute(self, name):
+        return getattr(self.__class__, name)
+
+    def __getAppFolder(self, appName):
         """
         Returns the path to the application data folder based on the operating system.
 
@@ -136,9 +153,12 @@ class PersistentMemory:
         else:
             # For unknown OS, raise an error or handle as needed
             raise NotImplementedError(f"OS '{osName}' not supported.")
+    
+    def clearCache(self):
+        """
+        Clears the in-memory cache.
+        """
+        self.__cache = {}
 
-
-if __name__ == '__main__':
-    persistentMemory = PersistentMemory('firstFolder', b'ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg=')
-    # persistentMemory.data_0='methmet'
-    print(persistentMemory.data_0)
+if __name__=="__main__":
+    pm = PersistentMemory("test")

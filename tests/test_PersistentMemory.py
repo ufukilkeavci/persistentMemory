@@ -6,9 +6,9 @@ class TestPersistentMemory(unittest.TestCase):
 
     def setUp(self):
         # Setup that runs before each test method
-        self.app_name = 'PersistentMemoryTest'
-        self.encryption_key = b'ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg='  # Use a proper key for actual testing
-        self.persistent_memory = PersistentMemory(self.app_name, self.encryption_key)
+        self.__appName = 'PersistentMemoryTest'
+        self.__encryptionKey = b'Znd89nxh0ztocWfeXo8SLIqwaj5EiieF8eqwi_7iE70='  # Use a proper key for actual testing
+        self.persistent_memory = PersistentMemory(appName=self.__appName)
 
     def test_initialization(self):
         # Test initialization
