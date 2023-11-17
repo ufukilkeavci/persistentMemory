@@ -2,6 +2,10 @@ LICENSE
 README.md
 setup.cfg
 setup.py
+PersistentMemory.egg-info/PKG-INFO
+PersistentMemory.egg-info/SOURCES.txt
+PersistentMemory.egg-info/dependency_links.txt
+PersistentMemory.egg-info/top_level.txt
 persistentMemory/PersistentMemory.py
 persistentMemory/__init__.py
 persistentMemory.egg-info/PKG-INFO
