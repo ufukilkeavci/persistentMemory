@@ -7,15 +7,18 @@ import platform
 class PersistentMemory:
     appFolder = None
     encryptionKey = None
+    cache = {}
 
     def __init__(self, appName, encryptionKey) -> None:
         self.appFolder = self.getAppFolder(appName)
         self.encryptionKey = encryptionKey
         # Additional initialization code (e.g., folder creation, key validation) goes here
+        self.cache = {}  # Initialize an empty cache
 
         # check if the folder exists and create it if it doesn't
         if not os.path.exists(self.appFolder):
             os.makedirs(self.appFolder)
+        
 
 
     def listKeys(self):
@@ -33,6 +36,7 @@ class PersistentMemory:
         # Serialize data
         serializedData = pickle.dumps(data)
 
+        self.cache[key] = data
         # check if data is None
         if serializedData is None:
             # if exists, delete the file
@@ -40,6 +44,8 @@ class PersistentMemory:
             if os.path.exists(filePath):
                 os.remove(filePath)
             return
+        
+        
 
         # Encrypt data
         if isinstance(self.encryptionKey, str):
@@ -59,6 +65,9 @@ class PersistentMemory:
             # The lock is automatically released when the file is closed
 
     def get(self, key):
+        if key in self.cache:
+            return self.cache[key]
+
         filePath = os.path.join(self.appFolder, key)
 
         # Check if the file exists
@@ -86,12 +95,17 @@ class PersistentMemory:
             return None
         
     def __getattr__(self, name):
-        # Attempt to fetch the data using the 'get' method
-        return self.get(name)
+        # Check if getting a predefined attribute
+        if name in ["appFolder", "encryptionKey", "initialize", "push", "get", "__getattr__", "__setattr__", "cache"]:
+            # Handle as normal attribute
+            return self.__dict__[name]
+        else:
+            # Handle as a data key
+            return self.get(name)
     
     def __setattr__(self, name, value):
         # Check if setting a predefined attribute
-        if name in ["appFolder", "encryptionKey", "initialize", "push", "get", "__getattr__", "__setattr__"]:
+        if name in ["appFolder", "encryptionKey", "initialize", "push", "get", "__getattr__", "__setattr__", "cache"]:
             # Handle as normal attribute
             self.__dict__[name] = value
         else:

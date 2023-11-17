@@ -16,11 +16,16 @@ class TestPersistentMemory(unittest.TestCase):
 
     def test_data_storage_and_retrieval(self):
         # Test storing and retrieving data without encryption
-        test_data = {'key': 'value'}
+        test_key = 'test_key'
+        test_data = 'test_value'
         # Store data
-        self.persistent_memory.test_data.key = test_data.value
+        self.persistent_memory.test_key = test_data
         # Retrieve and assert the retrieved data is as expected
-        retrieved_data = self.persistent_memory.test_data.key
+        retrieved_data = self.persistent_memory.test_key
+        if retrieved_data is None:
+            self.fail("Data retrieval failed.")
+        else:
+            self.assertEqual(test_data, retrieved_data)
 
     def test_error_handling(self):
         # Test error handling (e.g., wrong encryption key, file access issues)
