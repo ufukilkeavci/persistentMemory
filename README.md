@@ -7,7 +7,7 @@
 ## Installation
 You can install the library using pip:
 ```
-pip install persistentMemory
+pip install PersistentMemory
 ```
 
 ## Usage
@@ -39,9 +39,3 @@ Data read from disk is cached in memory, which speeds up subsequent read operati
 ## Features
 - Data persistence on the filesystem.
 - Data encryption.
-- def get_user_profile_info(user_id):
--   user = db.query("SELECT * FROM Users WHERE id = %s", user_id)
--   return user
-
-## API Reference
-Provide detailed descriptions and examples for each public method in the class here.
