@@ -94,7 +94,7 @@ class PersistentMemory:
             dataFromFile = encryptedData
         # Deserialize the data
         try:
-            return pickle.loads(decryptedData)
+            return pickle.loads(dataFromFile)
         except Exception as e:
             # Handle deserialization error
             print(f"Error during deserialization: {e}")
