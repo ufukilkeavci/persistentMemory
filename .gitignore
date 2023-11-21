@@ -1,2 +1,8 @@
 *.pyc
 __pycache__/
+dist/
+docs/
+PersistentMemory.egg-info/
+setup.py
+setup.cfg
+pyproject.toml
