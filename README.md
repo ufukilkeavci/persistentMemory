@@ -15,22 +15,22 @@ pip install PersistentMemory
 ### Initialization
 To use `PersistentMemory`, first import it and create an instance:
 ```python
-from persistentMemory.PersistentMemory import PersistentMemory
-pm = PersistentMemory(appName='YourAppName', encryptionKey='YourEncryptionKey')
+from persistentMemory.PersistentMemory import PersistentDictionary
+pd = PersistentDictionary(appName='YourAppName', encryptionKey='YourEncryptionKey')
 ```
 
 ### Storing Data
 You can store data using the `store_data` method:
 ```python
-pm.your_key = your_data
-pm.push('your_key', your_data)
+pd.your_key = your_data
+pd.push('your_key', your_data)
 ```
 
 ### Retrieving Data
 Retrieve data using the `retrieve_data` method. This method will first check the in-memory cache before accessing the disk:
 ```python
-data = pm.your_key
-data = pm.get('your_key')
+data = pd.your_key
+data = pd.get('your_key')
 ```
 
 ## Caching

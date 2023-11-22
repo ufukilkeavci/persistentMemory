@@ -1,10 +1,10 @@
 
 # Updated Example Usage of PersistentMemory
 
-from persistentMemory.PersistentMemory import PersistentMemory
+from persistentMemory.PersistentMemory import PersistentDictionary
 
 # Create an instance of PersistentMemory
-pm = PersistentMemory(appName='ExampleApp', encryptionKey='ExampleKey')
+pm = PersistentDictionary(appName='ExampleApp', encryptionKey='ExampleKey')
 
 # Storing data using attribute-style assignment and push method
 pm.example_key = 'example_value'

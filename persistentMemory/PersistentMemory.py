@@ -4,7 +4,7 @@ from cryptography.fernet import Fernet
 import portalocker
 import platform
 
-class PersistentMemory:
+class PersistentDictionary:
     __appFolder = None
     __encryptionKey = None
     __cache = {}
@@ -161,4 +161,4 @@ class PersistentMemory:
         self.__cache = {}
 
 if __name__=="__main__":
-    pm = PersistentMemory("test")
+    pm = PersistentDictionary("test")
