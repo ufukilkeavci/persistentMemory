@@ -6,4 +6,4 @@ PersistentMemory.egg-info/
 setup.py
 setup.cfg
 pyproject.toml
-clean.sh
+clear.sh
